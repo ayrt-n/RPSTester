@@ -36,9 +36,9 @@ struct ContentView: View {
             Text(choices[choice])
             Spacer()
             HStack {
-                ForEach(choices, id: \.self) { choice in
-                    Button(choice) {
-                        checkAnswer(guess: choice)
+                ForEach(choices, id: \.self) { ch in
+                    Button(ch) {
+                        checkAnswer(ch)
                     }
                     .primaryButton()
                 }
@@ -48,34 +48,58 @@ struct ContentView: View {
             Spacer()
         }
         .alert(feedbackMessage, isPresented: $showFeedback) {
-            Button("OK") {
+            Button("Continue") {
                 newRound()
             }
         }
         .alert("Game over!", isPresented: $showGameOver) {
             Button("Play again") {
-                
+                resetGame()
             }
         } message: {
             Text("You got \(score) correct")
         }
     }
     
-    func checkAnswer(guess: String) {
-        feedbackMessage = "Good job!"
-        score += 1
+    func checkAnswer(_ guess: String) {
+        if (shouldWin && guess == isBeat(by: choices[choice])) || (!shouldWin && choices[choice] == isBeat(by: guess)) {
+            feedbackMessage = "Correct!"
+            score += 1
+        } else {
+            feedbackMessage = "Incorrect!"
+        }
+        
         showFeedback = true
     }
     
     func newRound() {
         round += 1
         
+        if round >= 5 {
+            showGameOver = true
+        } else {
+            shouldWin.toggle()
+            choice = Int.random(in: 0..<2)
+        }
+    }
+    
+    func resetGame() {
+        score = 0
+        round = 0
         shouldWin.toggle()
         choice = Int.random(in: 0..<2)
-        
-        if round >= 2 {
-            score = 0
-            showGameOver = true
+    }
+    
+    func isBeat(by: String) -> String {
+        switch by {
+        case "Rock 🪨":
+            return "Paper 📄"
+        case "Paper 📄":
+            return "Scissors ✂️"
+        case "Scissors ✂️":
+            return "Rock 🪨"
+        default:
+            return ""
         }
     }
 }
